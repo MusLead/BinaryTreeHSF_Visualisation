@@ -57,7 +57,7 @@ public abstract class TreePane {
      * @param hGap The horizontal gap between nodes.
      * @param color The color to fill the nodes.
      */
-    @SuppressWarnings("UnnecessaryLocalVariable")
+    @SuppressWarnings({"UnnecessaryLocalVariable", "CommentedOutCode"})
     protected void displayTree(TreeNode<Integer> root, double x, double y, double hGap, Color color) {
         // Dynamically adjust horizontal gap based on depth
 //        int depth = root.getHeight();
@@ -125,18 +125,12 @@ public abstract class TreePane {
         // Initialize a new TreePane with the same tree as-in-original
         // Assuming there's a TreePane concrete class implementation
 
-        TreePane copied;
-
-        if(original instanceof AVL_Pane )
-            copied = new AVL_Pane(new AVLTree<>(original.tree), original.mainCanvas);
-        else if(original instanceof BST_Pane )
-            copied = new BST_Pane(new BSTree<>(original.tree), original.mainCanvas);
-        else if(original instanceof RBT_Pane )
-            copied = new RBT_Pane(new RBTree<>(original.tree), original.mainCanvas);
-        else
-            throw new RuntimeException("Unknown TreePane type");
-
-        return copied;
+        return switch (original) {
+            case AVL_Pane _ -> new AVL_Pane(new AVLTree<>(original.tree), original.mainCanvas);
+            case BST_Pane _ -> new BST_Pane(new BSTree<>(original.tree), original.mainCanvas);
+            case RBT_Pane _ -> new RBT_Pane(new RBTree<>(original.tree), original.mainCanvas);
+            default -> throw new RuntimeException("Unknown TreePane type");
+        };
 
         // You might want to copy other properties from the original
         // This will be specific to your implementation of TreePane

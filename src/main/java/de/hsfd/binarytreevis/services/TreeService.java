@@ -41,9 +41,9 @@ public abstract class TreeService<E extends Comparable<E>> implements Iterable<E
 
     private final ArrayList<String> recordList = new ArrayList<>();
 
-    private Consumer<String> status = s -> {};
+    private Consumer<String> status = _ -> {};
 
-    private Consumer<String> historyService = s -> {};
+    private Consumer<String> historyService = _ -> {};
 
     public void setRoot( TreeNode<E> root ) {
         this.root = root;
@@ -63,7 +63,7 @@ public abstract class TreeService<E extends Comparable<E>> implements Iterable<E
 
     public E lastInserted() {
         if (nodes.isEmpty()) throw new NoSuchElementException("There is no element in the nodes list.\n please check again the implementation in the TreeService class.\n");
-        return nodes.get(nodes.size() - 1);
+        return nodes.getLast();
     }
 
     public boolean search( E e) {
@@ -441,7 +441,7 @@ public abstract class TreeService<E extends Comparable<E>> implements Iterable<E
 
         queueNodes.add(root);
         while (!queueNodes.isEmpty()) {
-            TreeNode<E> current = queueNodes.remove(0);
+            TreeNode<E> current = queueNodes.removeFirst();
             if (current.getLeft() != null && current.getLeft().getData() != null) {
                 int leftValue = Integer.parseInt(current.getLeft().getData().toString());
                 iterNode.setLeft(new TreePrinter(leftValue, null, null));
@@ -454,7 +454,7 @@ public abstract class TreeService<E extends Comparable<E>> implements Iterable<E
                 queueNode.add(iterNode.getRight());
                 queueNodes.add(current.getRight());
             }
-            if (!queueNode.isEmpty()) iterNode = queueNode.remove(0); // remove the first element, so that the next element is the next node
+            if (!queueNode.isEmpty()) iterNode = queueNode.removeFirst(); // remove the first element, so that the next element is the next node
         }
         return treePrinterRoot;
     }

@@ -133,7 +133,7 @@ public abstract class TreeController extends Application {
         Scene scene = new Scene(parent);
 
         // Add listeners to scene width and height properties
-        scene.widthProperty().addListener((obs, oldVal, newVal) -> {
+        scene.widthProperty().addListener((_, _, _) -> {
             if(isHistorySelected.get()) {
                 // Redrawing the current view from treePanes at index
                 treePanes.get(index.get()).displayTree();
@@ -142,7 +142,7 @@ public abstract class TreeController extends Application {
             }
         });
 
-        scene.heightProperty().addListener((obs, oldVal, newVal) -> {
+        scene.heightProperty().addListener((_, _, _) -> {
             if(isHistorySelected.get()) {
                 // Redrawing the current view from treePanes at index
                 treePanes.get(index.get()).displayTree();
@@ -155,7 +155,7 @@ public abstract class TreeController extends Application {
         primaryStage.getIcons().add(new Image("file:data/tree.png"));
         primaryStage.setScene(scene);
 
-        primaryStage.fullScreenProperty().addListener((observable, oldValue, newValue) -> {
+        primaryStage.fullScreenProperty().addListener((_, _, _) -> {
             if(isHistorySelected.get()) {
                 // Redrawing the current view from treePanes at index
                 treePanes.get(index.get()).displayTree();
@@ -179,7 +179,7 @@ public abstract class TreeController extends Application {
     )
     {
 
-        nextButton.setOnAction(actionEvent -> {
+        nextButton.setOnAction(_ -> {
             if(index.get() == treePanes.size() - 1){
                 updateStatus("You have reached the end of the history!", StatusType.WARNING);
                 return;
@@ -201,7 +201,7 @@ public abstract class TreeController extends Application {
             if (index.get() == treePanes.size() - 1) nextButton.setDisable(true);
         });
 
-        prevButton.setOnAction(actionEvent -> {
+        prevButton.setOnAction(_ -> {
             if(index.get() == 0){
                 updateStatus("You have reached the start of the history!", StatusType.WARNING);
                 return;
@@ -233,7 +233,7 @@ public abstract class TreeController extends Application {
             ArrayList<TreePane> treePanes, AtomicInteger index, Pane pane
     ){
 
-        history.setOnAction(actionEvent -> {
+        history.setOnAction(_ -> {
             this.isHistorySelected.set(history.isSelected());
             if (history.isSelected()) {
                 setHistoryDefaultConfiguration(statusPage,"Action",isHistorySelected,textField, insert,
@@ -247,9 +247,9 @@ public abstract class TreeController extends Application {
             }
         });
 
-        insert.setOnAction(e-> insertNewNode(statusPage,textField, tree, view, treePanes, index));
+        insert.setOnAction(_ -> insertNewNode(statusPage,textField, tree, view, treePanes, index));
 
-        delete.setOnAction(e->{
+        delete.setOnAction(_ ->{
             if(!actionMode) return; // there is an error within the application, so don't do anything
 
             int key;
@@ -422,8 +422,8 @@ public abstract class TreeController extends Application {
     private void startWarningBlinking() {
         statusBox.setStyle("-fx-background-color:orange;");
         blinkAnimation = new Timeline(
-                new KeyFrame(Duration.seconds(1.7), e -> statusBox.setStyle("-fx-background-color:orange;")),
-                new KeyFrame(Duration.seconds(1), e -> statusBox.setStyle("-fx-background-color: transparent;"))
+                new KeyFrame(Duration.seconds(1.7), _ -> statusBox.setStyle("-fx-background-color:orange;")),
+                new KeyFrame(Duration.seconds(1), _ -> statusBox.setStyle("-fx-background-color: transparent;"))
         );
         blinkAnimation.setCycleCount(Timeline.INDEFINITE);
         blinkAnimation.play();
