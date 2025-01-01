@@ -18,6 +18,8 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    env:
+      MAVEN_OPTS: "-Xss2m"
 
     steps:
     - uses: actions/checkout@v4
