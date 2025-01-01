@@ -120,10 +120,9 @@ public class BSTTest {
         assertNull(tree.lookup(100), "Lookup should return null for non-existent nodes.");
     }
 
-    BSTree<Integer> bst = new BSTree<>();
-
     @Test
     public void testInsertion() throws IllegalAccessException {
+        BSTree<Integer> bst = new BSTree<>();
         assertDoesNotThrow(() -> bst.insert(50));
         assertDoesNotThrow(() -> bst.insert(30));
         assertDoesNotThrow(() -> bst.insert(70));
@@ -136,6 +135,7 @@ public class BSTTest {
 
     @Test
     public void testDeletion() throws TreeException, IllegalAccessException {
+        BSTree<Integer> bst = new BSTree<>();
         bst.insert(50);
         bst.insert(30);
         bst.insert(70);

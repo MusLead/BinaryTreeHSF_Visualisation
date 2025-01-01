@@ -222,17 +222,18 @@ public class RBTTest {
         assertTrue(isBalanced(rbTree.getRoot(), blackHeight));
     }
 
-    RBTree<Integer> rbt = new RBTree<>();
+
 
     @Test
     public void testInsertion() {
-        my_insert(50);
-        my_insert(30);
-        my_insert(20);
-        my_insert(40);
-        my_insert(70);
-        my_insert(60);
-        my_insert(80);
+        RBTree<Integer> rbt = new RBTree<>();
+        insert(50,rbt);
+        insert(30,rbt);
+        insert(20,rbt);
+        insert(40,rbt);
+        insert(70,rbt);
+        insert(60,rbt);
+        insert(80,rbt);
 
         // Test for tree structure, colors, and properties
         // You can implement a method in RBT to check tree properties if needed
@@ -241,14 +242,15 @@ public class RBTTest {
 
     @Test
     public void testInsertionDeletion() throws TreeException {
-        my_insert(3);
-        my_insert(4);
-        my_insert(5);
-        my_insert(10);
-        my_insert(20);
-        my_insert(30);
-        my_insert(23);
-        my_insert(24);
+        RBTree<Integer> rbt = new RBTree<>();
+        insert(3,rbt);
+        insert(4,rbt);
+        insert(5,rbt);
+        insert(10,rbt);
+        insert(20,rbt);
+        insert(30,rbt);
+        insert(23,rbt);
+        insert(24,rbt);
         while (rbt.getRoot() != null) {
             System.out.println("Delete: " + rbt.getNodes().getLast());
             rbt.delete(rbt.getNodes().getLast());
@@ -258,9 +260,10 @@ public class RBTTest {
 
     @Test
     public void testDeletion() throws TreeException {
-        my_insert(50);
-        my_insert(30);
-        my_insert(70);
+        RBTree<Integer> rbt = new RBTree<>();
+        insert(50,rbt);
+        insert(30,rbt);
+        insert(70,rbt);
         rbt.delete(30);
 
         // Test for tree structure, colors, and properties after deletion
@@ -269,13 +272,14 @@ public class RBTTest {
 
     @Test
     public void testTreePropertiesAfterOperations() throws TreeException {
-        my_insert(50);
-        my_insert(30);
-        my_insert(20);
-        my_insert(40);
-        my_insert(70);
-        my_insert(60);
-        my_insert(80);
+        RBTree<Integer> rbt = new RBTree<>();
+        insert(50,rbt);
+        insert(30,rbt);
+        insert(20,rbt);
+        insert(40,rbt);
+        insert(70,rbt);
+        insert(60,rbt);
+        insert(80,rbt);
 
         rbt.delete(60);
         rbt.delete(20);
@@ -319,7 +323,7 @@ public class RBTTest {
                 checkRBTPropertiesRec(node.getRight(), blackCount, pathBlackCount);
     }
 
-    private void my_insert(int value) {
+    private void insert(int value, RBTree<Integer> rbt) {
         assertDoesNotThrow(() -> rbt.insert(value));
     }
 

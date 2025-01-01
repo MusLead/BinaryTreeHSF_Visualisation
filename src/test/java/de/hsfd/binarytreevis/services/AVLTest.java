@@ -156,10 +156,9 @@ public class AVLTest {
         }
     }
 
-    private final AVLTree<Integer> avl = new AVLTree<>();
-
     @Test
     public void testInsertion() throws TreeException, IllegalAccessException {
+        AVLTree<Integer> avl = new AVLTree<>();
         avl.insert(50);
         avl.insert(30);
         avl.insert(70);
@@ -175,6 +174,7 @@ public class AVLTest {
 
     @Test
     public void testUnbalancedInsertion() throws TreeException, IllegalAccessException {
+        AVLTree<Integer> avl = new AVLTree<>();
         avl.insert(50);
         avl.insert(30);
         avl.insert(20);
@@ -188,6 +188,7 @@ public class AVLTest {
 
     @Test
     public void testDeletion() throws TreeException, IllegalAccessException {
+        AVLTree<Integer> avl = new AVLTree<>();
         avl.insert(50);
         avl.insert(30);
         avl.insert(70);
