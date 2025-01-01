@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MAVEN_OPTS: "-Xss2m"
+      NODE_OPTIONS: --stack-size=8192
 
     steps:
     - uses: actions/checkout@v4
