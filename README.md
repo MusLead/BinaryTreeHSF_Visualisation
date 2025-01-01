@@ -32,3 +32,6 @@ This project introduces **real-time interaction with a history-tracking feature.
   experience for users.
 + Dynamic resizing of the pane and nodes to prevent overlaps and maintain a clear layout, regardless of tree size.
 
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
