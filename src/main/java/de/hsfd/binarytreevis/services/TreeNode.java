@@ -56,7 +56,7 @@ public class TreeNode<E extends Comparable<E>> {
     }
 
     public void setLeft(TreeNode<E> n ) {
-        checkParentConnection(n);
+        checkParentConnectionAndRemove(n);
         // make sure that this.left.parent also null, so that the left children of this
         // does not have the connection to the parent or predecessor.
         if (this.left != null) this.left.parent = null;
@@ -68,7 +68,7 @@ public class TreeNode<E extends Comparable<E>> {
     }
 
     public void setRight(TreeNode<E> n ) {
-        checkParentConnection(n);
+        checkParentConnectionAndRemove(n);
         // make sure that this.right.parent also null, so that the right children of this
         // does not have the connection to the parent or predecessor.
         if (this.right != null) this.right.parent = null;
@@ -83,15 +83,24 @@ public class TreeNode<E extends Comparable<E>> {
         this.height = height;
     }
 
-    private void checkParentConnection(TreeNode<E> n) {
+    /**
+     * Ensures the parent-child relationship is correctly updated for a given node.
+     * This method only be used for the setLeft and setRight
+     * If the provided node has a parent, the method disconnects the node from its current parent.
+     * It then assigns the current object as the parent of the given node.
+     *
+     * @param n the TreeNode whose parent connection is being checked and potentially updated
+     */
+    protected void checkParentConnectionAndRemove(TreeNode<E> n) {
         if(n != null) {
-            if (n.parent != null) { // TODO make a test! make sure that the respected ex-nParent children is null
+            if (n.parent != null) {
                 // make sure that the n does not have any parent anymore
                 // since we want to connect n parent to this object
                 TreeNode<E> parent = n.parent;
                 if (parent.right == n) parent.right = null;
                 else parent.left = null;
             }
+            //this node should be n's parent
             n.parent = this;
         }
     }

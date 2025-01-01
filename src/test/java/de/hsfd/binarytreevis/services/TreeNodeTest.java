@@ -55,4 +55,35 @@ class TreeNodeTest {
         // Assert the old child is disconnected
         assertNull(child.getParent(), "Old child should no longer have a parent.");
     }
+
+    @Test
+    void checkParentConnectionAndRemove() {
+        // Create nodes
+        TreeNode<Integer> parent = new TreeNode<>(10);
+        TreeNode<Integer> oldParent = new TreeNode<>(100);
+        TreeNode<Integer> leftChild = new TreeNode<>(5);
+        TreeNode<Integer> rightChild = new TreeNode<>(15);
+
+        // Set children
+        oldParent.setLeft(leftChild);
+        oldParent.setRight(rightChild);
+    
+        // Assert initial connections
+        assertEquals(leftChild, oldParent.getLeft(), "Left child should be set correctly.");
+        assertEquals(rightChild, oldParent.getRight(), "Right child should be set correctly.");
+        assertNull(parent.getRight(), "Parent should have no children");
+        assertNull(parent.getLeft(), "Parent should have no children");
+    
+        // Remove connections
+        parent.checkParentConnectionAndRemove(leftChild);
+        parent.checkParentConnectionAndRemove(rightChild);
+    
+        // Assert disconnections
+        assertNull(oldParent.getLeft(), "Left child should be removed from the oldParent.");
+        assertNull(oldParent.getRight(), "Right child should be removed from the oldParent.");
+        assertEquals(leftChild.getParent(), parent, "Parent should have right child.");
+        assertEquals(rightChild.getParent(), parent, "Parent should have left child.");
+        
+        
+    }
 }
