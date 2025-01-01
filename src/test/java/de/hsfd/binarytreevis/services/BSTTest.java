@@ -1,7 +1,6 @@
 package de.hsfd.binarytreevis.services;
 
 import de.hsfd.binarytreevis.services.bst.BSTree;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -121,12 +120,7 @@ public class BSTTest {
         assertNull(tree.lookup(100), "Lookup should return null for non-existent nodes.");
     }
 
-    BSTree<Integer> bst;
-
-    @BeforeEach
-    public void setUp() {
-        bst = new BSTree<>();
-    }
+    BSTree<Integer> bst = new BSTree<>();
 
     @Test
     public void testInsertion() throws IllegalAccessException {

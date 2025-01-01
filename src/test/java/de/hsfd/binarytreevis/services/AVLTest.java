@@ -1,7 +1,6 @@
 package de.hsfd.binarytreevis.services;
 
 import de.hsfd.binarytreevis.services.avl.AVLTree;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static de.hsfd.binarytreevis.services.TreeNode.DEFAULT_HEIGHT;
@@ -157,12 +156,7 @@ public class AVLTest {
         }
     }
 
-    private AVLTree<Integer> avl;
-
-    @BeforeEach
-    public void setUp() {
-        avl = new AVLTree<>();
-    }
+    private final AVLTree<Integer> avl = new AVLTree<>();
 
     @Test
     public void testInsertion() throws TreeException, IllegalAccessException {

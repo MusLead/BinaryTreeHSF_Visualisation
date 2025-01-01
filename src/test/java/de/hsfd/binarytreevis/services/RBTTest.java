@@ -1,7 +1,6 @@
 package de.hsfd.binarytreevis.services;
 
 import de.hsfd.binarytreevis.services.rbt.RBTree;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static de.hsfd.binarytreevis.services.TreeNode.*;
@@ -223,12 +222,7 @@ public class RBTTest {
         assertTrue(isBalanced(rbTree.getRoot(), blackHeight));
     }
 
-    RBTree<Integer> rbt;
-
-    @BeforeEach
-    public void setUp() {
-        rbt = new RBTree<>();
-    }
+    RBTree<Integer> rbt = new RBTree<>();
 
     @Test
     public void testInsertion() {
