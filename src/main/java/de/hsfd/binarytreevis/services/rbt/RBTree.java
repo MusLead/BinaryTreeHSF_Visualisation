@@ -111,7 +111,6 @@ public class RBTree<E extends Comparable<E>> extends TreeService<E> {
                 record.append("> Case 3: rotate grandParent (").append(grandParent.getData()).append("). ")
                         .append("Change color grandParent (").append(grandParent.getData())
                         .append(") to red and parent (").append(parent.getData()).append(") to black\n");
-                // case 3 will always be executed after case 2
                 parent.setColor(BLACK);
                 grandParent.setColor(RED);
                 if (isGrandparentLeftChild) rightRotate(grandParent);

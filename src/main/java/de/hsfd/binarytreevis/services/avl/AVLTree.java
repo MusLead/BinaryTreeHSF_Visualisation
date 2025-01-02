@@ -74,13 +74,13 @@ public class AVLTree<E extends Comparable<E>> extends TreeService<E> {
         StringBuilder record = new StringBuilder();
         while(parent != null) {
             updateHeight(parent);
-            int balance = getBalance(parent);
+            int balance = getBalanceFactor(parent);
 
             if(balance > 1 || balance < -1) {
                 if (balance > 0) {
                     record.append("> Left heavy from the parent ").append(parent.getData()).append(", before rotation:\n");
                     record.append(getTreePrinter().prettyPrint());
-                    if(parent.equals(newNode) && getBalance(parent.getLeft()) < 0 // delete case
+                    if(parent.equals(newNode) && getBalanceFactor(parent.getLeft()) < 0 // delete case
                             || !parent.equals(newNode) &&  newNode.getData().compareTo(parent.getLeft().getData()) > 0) { //insert case
                         record.append("-> Left Rotation, after rotation:\n");
                         leftRotate(parent.getLeft());// Left Right Case
@@ -92,7 +92,7 @@ public class AVLTree<E extends Comparable<E>> extends TreeService<E> {
                 } else { // (balance < 0) right heavy from the parent
                     record.append("> Right heavy from the parent ").append(parent.getData()).append(", before rotation:\n");
                     record.append(getTreePrinter().prettyPrint());
-                    if (parent.equals(newNode) && getBalance(parent.getRight()) > 0 // delete case
+                    if (parent.equals(newNode) && getBalanceFactor(parent.getRight()) > 0 // delete case
                             || !parent.equals(newNode) && newNode.getData().compareTo(parent.getRight().getData()) < 0){ //insert case
                         record.append("-> Right Rotation, after rotation:\n");
                         rightRotate(parent.getRight());// Right Left Case
@@ -103,7 +103,7 @@ public class AVLTree<E extends Comparable<E>> extends TreeService<E> {
                     record.append(getTreePrinter().prettyPrint());
                 }
                 if(parent.getParent() == null) this.setRoot(parent);
-                if(getBalance(parent) > 1)
+                if(getBalanceFactor(parent) > 1) // this node to the leaf should now be balanced
                     throw new TreeException("Violates the AVL tree rule\nNode: " +
                             parent.getData() +"\nHeight: " + parent.getHeight() + "\nTree:\n"
                             + this.getTreePrinter().prettyPrint());
@@ -122,7 +122,7 @@ public class AVLTree<E extends Comparable<E>> extends TreeService<E> {
      * @param n the root to be checked whether imbalance exists
      * @return the integer result of the balance factor
      */
-    private int getBalance(TreeNode<E> n) {
+    private int getBalanceFactor(TreeNode<E> n) {
         if (n == null) // it means the node has not been initialised
             return 0;
         return height(n.getLeft()) - height(n.getRight());
@@ -148,7 +148,7 @@ public class AVLTree<E extends Comparable<E>> extends TreeService<E> {
 
             // this code can only be executed if initialised height for a node is 0!
             if(parent.getHeight() > 1) {
-                int balance = getBalance(parent);
+                int balance = getBalanceFactor(parent);
                 if (balance > 0) { //left heavy from the parent
                     if (newNode.getData().compareTo(parent.getLeft().getData()) > 0) {
                         leftRotate(parent.getLeft());

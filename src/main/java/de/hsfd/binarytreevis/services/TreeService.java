@@ -256,7 +256,7 @@ public abstract class TreeService<E extends Comparable<E>> implements Iterable<E
         if(root == null)
             root = newNode;
         else {
-            TreeNode<E> parent = getParent(newNode.getData());
+            TreeNode<E> parent = getParentOf(newNode.getData());
 
             if(newNode.getData().compareTo(parent.getData()) < 0) {
                 parent.setLeft(newNode);
@@ -279,7 +279,7 @@ public abstract class TreeService<E extends Comparable<E>> implements Iterable<E
      * @param x The value that needs to be attached to the parent
      * @return the available parent
      */
-    protected TreeNode<E> getParent(E x) throws TreeException {
+    protected TreeNode<E> getParentOf(E x) throws TreeException {
         TreeNode<E> parent = null;
         TreeNode<E> n = root;
         while(n != null) {
