@@ -205,6 +205,22 @@ public class AVLTest {
         assertTrue(isBalanced(avl.getRoot()));
     }
 
+    @Test
+    void testDeleteOnly11() throws TreeException {
+        AVLTree<Integer> avl = new AVLTree<>();
+        avl.insert(25);
+        avl.insert(15);
+        avl.insert(55);
+        avl.insert(11);
+        avl.insert(35);
+        avl.insert(77);
+        avl.insert(66);
+
+        avl.delete(11);
+
+        assertEquals(55, avl.getRoot().getData());
+        assertTrue(isBalanced(avl.getRoot()));
+    }
 
     private boolean isBalanced(TreeNode<Integer> node) {
         if (node == null) {

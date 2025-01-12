@@ -5,9 +5,12 @@ import de.hsfd.binarytreevis.services.TreeException;
 import de.hsfd.binarytreevis.services.TreeNode;
 import de.hsfd.binarytreevis.services.TreeService;
 
+import static de.hsfd.binarytreevis.services.avl.AVLTree.OPERATION.DELETE;
+import static de.hsfd.binarytreevis.services.avl.AVLTree.OPERATION.INSERT;
+
 @Author(name = "Agha Muhammad Aslam", date = "31 Dec 2024")
 public class AVLTree<E extends Comparable<E>> extends TreeService<E> {
-
+    enum OPERATION {INSERT, DELETE}
     public AVLTree() {
         super();
     }
@@ -34,7 +37,7 @@ public class AVLTree<E extends Comparable<E>> extends TreeService<E> {
             }
 
             if(target.getParent() == null && target != getRoot()) target = parentTarget;
-            balanceTheTree(target,target);
+            balanceTheTree(target,target, DELETE);
             return possibleNullNode;
         }
         return null;
@@ -45,7 +48,7 @@ public class AVLTree<E extends Comparable<E>> extends TreeService<E> {
     public void insert(E x) throws TreeException {
         TreeNode<E> newNode = new TreeNode<>(x);
         insertNode(newNode);
-        balanceTheTree(newNode.getParent(), newNode);
+        balanceTheTree(newNode.getParent(), newNode, INSERT);
     }
 
     /**
@@ -70,7 +73,7 @@ public class AVLTree<E extends Comparable<E>> extends TreeService<E> {
      *                otherwise for delete should only be newNode == parent
      * @throws TreeException if a violation of AVL tree properties persists after balancing
      */
-    private void balanceTheTree(TreeNode<E> parent, TreeNode<E> newNode) throws TreeException {
+    private void balanceTheTree(TreeNode<E> parent, TreeNode<E> newNode, OPERATION operation) throws TreeException {
         StringBuilder record = new StringBuilder();
         while(parent != null) {
             updateHeight(parent);
@@ -80,8 +83,8 @@ public class AVLTree<E extends Comparable<E>> extends TreeService<E> {
                 if (balance > 0) {
                     record.append("> Left heavy from the parent ").append(parent.getData()).append(", before rotation:\n");
                     record.append(getTreePrinter().prettyPrint());
-                    if(parent.equals(newNode) && getBalanceFactor(parent.getLeft()) < 0 // delete case
-                            || !parent.equals(newNode) &&  newNode.getData().compareTo(parent.getLeft().getData()) > 0) { //insert case
+                    if(operation.equals(DELETE) && getBalanceFactor(parent.getLeft()) < 0 // delete case
+                            || operation.equals(INSERT) &&  newNode.getData().compareTo(parent.getLeft().getData()) > 0) { //insert case
                         record.append("-> Left Rotation, after rotation:\n");
                         leftRotate(parent.getLeft());// Left Right Case
                         record.append(getTreePrinter().prettyPrint());
@@ -92,8 +95,8 @@ public class AVLTree<E extends Comparable<E>> extends TreeService<E> {
                 } else { // (balance < 0) right heavy from the parent
                     record.append("> Right heavy from the parent ").append(parent.getData()).append(", before rotation:\n");
                     record.append(getTreePrinter().prettyPrint());
-                    if (parent.equals(newNode) && getBalanceFactor(parent.getRight()) > 0 // delete case
-                            || !parent.equals(newNode) && newNode.getData().compareTo(parent.getRight().getData()) < 0){ //insert case
+                    if (operation.equals(DELETE) && getBalanceFactor(parent.getRight()) > 0 // delete case
+                            || operation.equals(INSERT) && newNode.getData().compareTo(parent.getRight().getData()) < 0){ //insert case
                         record.append("-> Right Rotation, after rotation:\n");
                         rightRotate(parent.getRight());// Right Left Case
                         record.append(getTreePrinter().prettyPrint());
@@ -134,7 +137,7 @@ public class AVLTree<E extends Comparable<E>> extends TreeService<E> {
      * @deprecated
      *      <p>This method is no longer acceptable because it is not flexible with the implementation.
      *       We want a function that could be also used for the other function like delete, not only for insert</p>
-     *      Please refer to {@link #balanceTheTree(TreeNode,TreeNode)}
+     *      Please refer to {@link #balanceTheTree(TreeNode,TreeNode,OPERATION)}
      * @param parent the parent of the newNode
      * @param newNode will be used for the comparison checking.
      */
