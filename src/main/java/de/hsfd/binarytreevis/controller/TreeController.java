@@ -20,13 +20,15 @@ import javafx.scene.text.Text;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @Author(name = "Agha Muhammad Aslam", date = "12 Dec 2023")
@@ -101,7 +103,6 @@ public abstract class TreeController extends Application {
             Button prevButton = (Button) mainScreen.lookup("#prevButton");
             Text status = (Text) mainScreen.lookup("#pageView");
 
-//            messageBox.setWrapText(true);
             messageBox.getStyleClass().add("browser");
 
             addFunctionalities(status,textField, insert, delete, nextButton,
@@ -111,11 +112,7 @@ public abstract class TreeController extends Application {
                                       index, treePanes, tree);
 
             tree.setStatus(nodesView::setText);
-            tree.setHistoryService(s -> {
-//                messageBox.clear(); // every time the history accepts a record, clear all the log, and add a new one!
-//                messageBox.appendText(s);
-                reparse(s,messageBox);
-            });
+            tree.setHistoryService(s -> reparse(s,messageBox));
 
         } catch (NullPointerException e){
             //noinspection CallToPrintStackTrace
@@ -127,18 +124,96 @@ public abstract class TreeController extends Application {
 
     private void reparse(String s, WebView messageBox) {
         try {
-            String doc = "<!DOCTYPE html><html><head><link href=\"%s\" rel=\"stylesheet\"/></head><body>%s</body></html>";
+            String doc = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link href=\"%s\" rel=\"stylesheet\"/></head><body>%s</body></html>";
             String css =
                     "https://raw.github.com/nicolashery/markdownpad-github/master/markdownpad-github.css";
-//                    "https://kevinburke.bitbucket.org/markdowncss/markdown.css";
+                    //"https://kevinburke.bitbucket.org/markdowncss/markdown.css";
             String textHtml = Processor.process(s);
-            String html = String.format( doc, css, textHtml);
-//        System.out.println(html);
+
+            // Debugging: Log processed HTML
+//            System.out.println("Processed HTML (before character adjustment): " + textHtml);
+
+            // Adjust characters in the SVG
+            String adjustedHtml = adjustCharactersInSVG(textHtml);
+
+            // Debugging: Log adjusted HTML
+//            System.out.println("Adjusted HTML: " + adjustedHtml);
+
+            // Create final HTML
+            String html = String.format(doc, css, adjustedHtml);
+
             messageBox.getEngine().loadContent( html, "text/html");
-//        webView.getEngine().executeScript("window.scrollTo(100,100);");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Adjusts the characters within the <text> elements of an SVG block in the provided HTML string.
+     * This method processes the HTML to find <svg> tags and then adjusts the content of <text> elements
+     * within those <svg> tags to ensure correct rendering of characters.
+     *
+     * @param textHtml The HTML string containing SVG elements to be processed.
+     * @return A new HTML string with adjusted characters within the <text> elements of SVG blocks.
+     */
+    private String adjustCharactersInSVG(String textHtml) {
+        // Debugging step: Log processed HTML
+        System.out.println("Processed HTML: " + textHtml);
+
+        // Match the <svg> tag and process its content
+        Pattern svgPattern = Pattern.compile("<svg[^>]*>.*?</svg>", Pattern.DOTALL);
+        Matcher svgMatcher = svgPattern.matcher(textHtml);
+        StringBuilder adjustedText = new StringBuilder();
+
+        while (svgMatcher.find()) {
+            String svgContent = svgMatcher.group(); // Extract the entire <svg> block
+
+            // Match and adjust the <text> content inside the <svg>
+            Pattern textPattern = Pattern.compile("(<text[^>]*>)(.*?)(</text>)", Pattern.DOTALL);
+            StringBuilder updatedSvgContent = getUpdatedSvgContent(textPattern, svgContent);
+
+            // Replace the original <svg> block with the updated one
+            svgMatcher.appendReplacement(adjustedText, updatedSvgContent.toString());
+        }
+        svgMatcher.appendTail(adjustedText);
+
+        return adjustedText.toString();
+    }
+
+    /**
+     * <p>
+     * Adjusts the characters within the <text> elements of an SVG block in the provided HTML string.
+     * This method processes the HTML to find <svg> tags and then adjusts the content of <text> elements
+     * within those <svg> tags to ensure correct rendering of characters. 
+     * </p>
+     * This method is used only by {@link #adjustCharactersInSVG(String)} to process the content of <text> elements.
+     *
+     * @param textPattern The pattern to match <text> elements within an SVG block.
+     * @param svgContent The SVG content to be processed.
+     * @return A new StringBuilder containing the SVG content with adjusted characters within the <text> elements.
+     */
+    private static @NotNull StringBuilder getUpdatedSvgContent(Pattern textPattern, String svgContent) {
+        Matcher textMatcher = textPattern.matcher(svgContent);
+        StringBuilder updatedSvgContent = new StringBuilder();
+
+        while (textMatcher.find()) {
+            String textOpeningTag = textMatcher.group(1); // <text ...>
+            String textContent = textMatcher.group(2);    // Characters inside <text>...</text>
+            String textClosingTag = textMatcher.group(3); // </text>
+
+            StringBuilder incrementedContent = new StringBuilder();
+
+            // Increment each character in the text content
+            for (char c : textContent.toCharArray()) {
+                incrementedContent.append((char) (c + 1));
+            }
+
+            // Reassemble the <text> block with updated content
+            textMatcher.appendReplacement(updatedSvgContent,
+                    textOpeningTag + incrementedContent + textClosingTag);
+        }
+        textMatcher.appendTail(updatedSvgContent);
+        return updatedSvgContent;
     }
 
 
@@ -213,8 +288,6 @@ public abstract class TreeController extends Application {
 
             if( !tree.getRecordList().isEmpty() ) {
                 String s = tree.getRecordList().get(index.get());
-//                messageBox.clear();
-//                messageBox.appendText(s);
                 reparse(s,messageBox);
             }
 
@@ -237,8 +310,6 @@ public abstract class TreeController extends Application {
 
             if( !tree.getRecordList().isEmpty() ) {
                 String s = tree.getRecordList().get(index.get());
-//                messageBox.clear();
-//                messageBox.appendText(s);
                 reparse(s,messageBox);
             }
 
@@ -355,8 +426,6 @@ public abstract class TreeController extends Application {
 
         if( !tree.getRecordList().isEmpty() ) {
             String s = tree.getRecordList().get(index.get());
-//                messageBox.clear();
-//                messageBox.appendText(s);
             reparse(s,messageBox);
         }
 
@@ -424,12 +493,6 @@ public abstract class TreeController extends Application {
                     -----
                     Delete and Insert will not working.
                     Please debug and restart the application!""";
-
-//            ArrayList<String> recordList = tree.getRecordList();
-//            String log = !recordList.isEmpty() ? recordList.get(index.get()) + message : message;
-
-//            messageBox.appendText(log);
-
         }
 
         statusLabel.setText(statusType == StatusType.ERROR ? "ERROR" : message);

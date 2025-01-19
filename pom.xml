@@ -37,6 +37,11 @@
             <artifactId>txtmark</artifactId>
             <version>0.13</version>
         </dependency>
+        <dependency>
+            <groupId>guru.nidi</groupId>
+            <artifactId>graphviz-java</artifactId>
+            <version>0.18.1</version>
+        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
