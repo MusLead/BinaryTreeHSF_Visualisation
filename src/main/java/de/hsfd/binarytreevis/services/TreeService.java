@@ -1,6 +1,7 @@
 package de.hsfd.binarytreevis.services;
 
 import de.hsfd.binarytreevis.TreePrinter;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -252,7 +253,7 @@ public abstract class TreeService<E extends Comparable<E>> implements Iterable<E
      * @param newNode will be added to the tree
      */
     protected void insertNode(TreeNode<E> newNode) throws TreeException {
-        addRecord("- Insert " + newNode.getData() + " to the tree\n");
+        addRecord("\n- Insert " + newNode.getData() + " to the tree\n");
         if(root == null)
             root = newNode;
         else {
@@ -553,7 +554,7 @@ public abstract class TreeService<E extends Comparable<E>> implements Iterable<E
     }
 
     @Override
-    public Iterator<E> iterator() {
+    public @NotNull Iterator<E> iterator() {
         return new Iterator<>() {
             private TreeNode<E> current = findMinimum(getRoot());
 

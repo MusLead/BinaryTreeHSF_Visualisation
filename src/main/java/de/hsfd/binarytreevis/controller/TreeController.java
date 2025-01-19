@@ -1,5 +1,6 @@
 package de.hsfd.binarytreevis.controller;
 
+import com.github.rjeschke.txtmark.Processor;
 import de.hsfd.binarytreevis.services.Author;
 import de.hsfd.binarytreevis.services.TreeException;
 import de.hsfd.binarytreevis.services.TreeService;
@@ -16,6 +17,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -63,7 +65,7 @@ public abstract class TreeController extends Application {
 
     private final Pane mainCanvas = (Pane) mainScreen.lookup("#canvas");
 
-    private final TextArea textAreaBox = (TextArea) mainScreen.lookup("#textAreaBox");
+    private final WebView messageBox = (WebView) mainScreen.lookup("#messageBox");
 
     public Pane getMainCanvas( ) {
         return mainCanvas;
@@ -99,7 +101,8 @@ public abstract class TreeController extends Application {
             Button prevButton = (Button) mainScreen.lookup("#prevButton");
             Text status = (Text) mainScreen.lookup("#pageView");
 
-            textAreaBox.setWrapText(true);
+//            messageBox.setWrapText(true);
+            messageBox.getStyleClass().add("browser");
 
             addFunctionalities(status,textField, insert, delete, nextButton,
                                prevButton, history, tree, view, treePanes, index,
@@ -109,8 +112,9 @@ public abstract class TreeController extends Application {
 
             tree.setStatus(nodesView::setText);
             tree.setHistoryService(s -> {
-                textAreaBox.clear(); // every time the history accepts a record, clear all the log, and add a new one!
-                textAreaBox.appendText(s);
+//                messageBox.clear(); // every time the history accepts a record, clear all the log, and add a new one!
+//                messageBox.appendText(s);
+                reparse(s,messageBox);
             });
 
         } catch (NullPointerException e){
@@ -119,6 +123,22 @@ public abstract class TreeController extends Application {
             updateStatus("Something went wrong!\n" + e.getMessage(), StatusType.ERROR);
         }
         return mainScreen;
+    }
+
+    private void reparse(String s, WebView messageBox) {
+        try {
+            String doc = "<!DOCTYPE html><html><head><link href=\"%s\" rel=\"stylesheet\"/></head><body>%s</body></html>";
+            String css =
+                    "https://raw.github.com/nicolashery/markdownpad-github/master/markdownpad-github.css";
+//                    "https://kevinburke.bitbucket.org/markdowncss/markdown.css";
+            String textHtml = Processor.process(s);
+            String html = String.format( doc, css, textHtml);
+//        System.out.println(html);
+            messageBox.getEngine().loadContent( html, "text/html");
+//        webView.getEngine().executeScript("window.scrollTo(100,100);");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -192,8 +212,10 @@ public abstract class TreeController extends Application {
             nextView.displayTree();
 
             if( !tree.getRecordList().isEmpty() ) {
-                textAreaBox.clear();
-                textAreaBox.appendText(tree.getRecordList().get(index.get()));
+                String s = tree.getRecordList().get(index.get());
+//                messageBox.clear();
+//                messageBox.appendText(s);
+                reparse(s,messageBox);
             }
 
             status.setText((index.get() + 1) + "/" + treePanes.size());   // update the status
@@ -214,8 +236,10 @@ public abstract class TreeController extends Application {
             prevView.displayTree();
 
             if( !tree.getRecordList().isEmpty() ) {
-                textAreaBox.clear();
-                textAreaBox.appendText(tree.getRecordList().get(index.get()));
+                String s = tree.getRecordList().get(index.get());
+//                messageBox.clear();
+//                messageBox.appendText(s);
+                reparse(s,messageBox);
             }
 
             status.setText((index.get() + 1) + "/" + treePanes.size());   // update the status
@@ -238,12 +262,12 @@ public abstract class TreeController extends Application {
             if (history.isSelected()) {
                 setHistoryDefaultConfiguration(statusPage,"Action",isHistorySelected,textField, insert,
                                                delete, next, prev, history, tree, treePanes,
-                                               index, pane, textAreaBox, view);
+                                               index, pane, messageBox, view);
                 next.setDisable(index.get() == treePanes.size() - 1);
             } else {
                 setHistoryDefaultConfiguration(statusPage,"History",isHistorySelected,textField, insert,
                                                delete, next, prev, history, tree, treePanes,
-                                               index, pane, textAreaBox, view);
+                                               index, pane, messageBox, view);
             }
         });
 
@@ -287,7 +311,7 @@ public abstract class TreeController extends Application {
                     ex.printStackTrace();
                     String msg = tree.getRecordList().get(index.get())+ "----\n" + ex.getMessage();
                     tree.getRecordList().add(msg);
-                    textAreaBox.appendText(tree.getRecordList().get(index.incrementAndGet()));
+//                    messageBox.appendText(tree.getRecordList().get(index.incrementAndGet()));
                     updateStatus("Trying delete: " + key +"\nSomething went wrong,\nCheck the console!", StatusType.ERROR);
                 } catch (TreeException ex) {
                     throw new RuntimeException(ex);
@@ -314,7 +338,7 @@ public abstract class TreeController extends Application {
                                                  Button delete, Button next, Button prev,
                                                  ToggleButton history, TreeService<Integer> tree,
                                                  ArrayList<TreePane> treePanes, AtomicInteger index,
-                                                 Pane pane, TextArea textAreaBox, TreePane view
+                                                 Pane pane, WebView messageBox, TreePane view
     ) {
         history.setText(str);
         updateStatus((str.equals("History") ? "Action" : "History") +" mode", StatusType.NORMAL);
@@ -330,8 +354,10 @@ public abstract class TreeController extends Application {
         TreePane thisView = treePanes.get(index.get());
 
         if( !tree.getRecordList().isEmpty() ) {
-            textAreaBox.clear();
-            textAreaBox.appendText(tree.getRecordList().get(index.get()));
+            String s = tree.getRecordList().get(index.get());
+//                messageBox.clear();
+//                messageBox.appendText(s);
+            reparse(s,messageBox);
         }
 
         if(!thisView.getTree().equals( view.getTree())) {
@@ -399,9 +425,10 @@ public abstract class TreeController extends Application {
                     Delete and Insert will not working.
                     Please debug and restart the application!""";
 
-            ArrayList<String> recordList = tree.getRecordList();
-            String log = !recordList.isEmpty() ? recordList.get(index.get()) + message : message;
-            textAreaBox.appendText(log);
+//            ArrayList<String> recordList = tree.getRecordList();
+//            String log = !recordList.isEmpty() ? recordList.get(index.get()) + message : message;
+
+//            messageBox.appendText(log);
 
         }
 

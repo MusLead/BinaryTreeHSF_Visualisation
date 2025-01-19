@@ -1,6 +1,8 @@
 module de.hsfd.binarytreevis {
-    requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.web;
+    requires txtmark;
+    requires org.jetbrains.annotations;
 
 
     opens de.hsfd.binarytreevis to javafx.fxml;
