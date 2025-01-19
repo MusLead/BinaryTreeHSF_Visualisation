@@ -1,10 +1,8 @@
 package de.hsfd.binarytreevis.services;
 
 import de.hsfd.binarytreevis.TreePrinter;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
@@ -18,7 +16,7 @@ import java.util.function.Consumer;
  */
 @Author(name = "Ankit Sharma", date = "12 Oct 2018")
 @Author(name = "Agha Muhammad Aslam", date = "12 Dec 2023")
-public abstract class TreeService<E extends Comparable<E>> implements Iterable<E> {
+public abstract class TreeService<E extends Comparable<E>> {
 
     public TreeService( ) {}
 
@@ -569,50 +567,12 @@ public abstract class TreeService<E extends Comparable<E>> implements Iterable<E
         String svgContent = this.getTreePrinter().getTreeAsImage();
         record.append("<div>").append(svgContent).append("</div>\n");
         if (svgContent != null) {
-            String downloadLink = TreePrinter.generateDownloadableSVGLink(svgContent, "tree_" + parent.getData() + ".svg");
+            String downloadLink = TreePrinter.generateDownloadableSVGLink(svgContent, "tree_" +
+                    (parent != null ? parent.getData() : "null") + ".svg");
             record.append(downloadLink).append("\n\n");
         } else {
             record.append("Failed to generate tree as SVG.\n\n");
         }
     }
-
-    @Override
-    public @NotNull Iterator<E> iterator() {
-        return new Iterator<>() {
-            private TreeNode<E> current = findMinimum(getRoot());
-
-            private TreeNode<E> findMinimum(TreeNode<E> node) {
-                while (node != null && node.getLeft() != null)
-                    node = node.getLeft();
-                return node;
-            }
-
-            private TreeNode<E> findSuccessor(TreeNode<E> node) {
-                if (node.getRight() != null) {
-                    return findMinimum(node.getRight());
-                }
-                TreeNode<E> parent = node.getParent();
-                while (parent != null && node == parent.getRight()) {
-                    node = parent;
-                    parent = parent.getParent();
-                }
-                return parent;
-            }
-
-            @Override
-            public boolean hasNext() {
-                return current != null;
-            }
-
-            @Override
-            public E next() {
-                if (current == null) throw new NoSuchElementException();
-                E data = current.getData();
-                current = findSuccessor(current);
-                return data;
-            }
-        };
-    }
-
 
 }

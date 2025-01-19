@@ -2,7 +2,6 @@ module de.hsfd.binarytreevis {
     requires javafx.fxml;
     requires javafx.web;
     requires txtmark;
-    requires org.jetbrains.annotations;
     requires guru.nidi.graphviz;
     requires java.desktop;
     requires java.logging;

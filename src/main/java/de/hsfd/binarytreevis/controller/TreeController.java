@@ -20,7 +20,6 @@ import javafx.scene.text.Text;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -161,7 +160,7 @@ public abstract class TreeController extends Application {
      */
     private String adjustCharactersInSVG(String textHtml) {
         // Debugging step: Log processed HTML
-        System.out.println("Processed HTML: " + textHtml);
+        // System.out.println("Processed HTML: " + textHtml);
 
         // Match the <svg> tag and process its content
         Pattern svgPattern = Pattern.compile("<svg[^>]*>.*?</svg>", Pattern.DOTALL);
@@ -195,7 +194,7 @@ public abstract class TreeController extends Application {
      * @param svgContent The SVG content to be processed.
      * @return A new StringBuilder containing the SVG content with adjusted characters within the <text> elements.
      */
-    private static @NotNull StringBuilder getUpdatedSvgContent(Pattern textPattern, String svgContent) {
+    private static StringBuilder getUpdatedSvgContent(Pattern textPattern, String svgContent) {
         Matcher textMatcher = textPattern.matcher(svgContent);
         StringBuilder updatedSvgContent = new StringBuilder();
 
