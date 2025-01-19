@@ -124,25 +124,28 @@ public abstract class TreeController extends Application {
 
     private void reparse(String s, WebView messageBox) {
         try {
-            String doc = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link href=\"%s\" rel=\"stylesheet\"/></head><body>%s</body></html>";
-            String css =
-                    "https://raw.github.com/nicolashery/markdownpad-github/master/markdownpad-github.css";
-                    //"https://kevinburke.bitbucket.org/markdowncss/markdown.css";
+            // Define the HTML template
+            String doc = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\">"
+                    + "<link href=\"%s\" rel=\"stylesheet\"/></head><body>%s%s</body></html>";
+
+            // Define the CSS file link
+            String css = "https://raw.github.com/nicolashery/markdownpad-github/master/markdownpad-github.css";
+                        //"https://kevinburke.bitbucket.org/markdowncss/markdown.css";
+
+            // Define the JavaScript for auto-scrolling
+            String scrollScript = "<script>window.onload = function() { "
+                    + "window.scrollTo(0, document.body.scrollHeight); "
+                    + "}</script>";
+
+            // Process and adjust the input text
             String textHtml = Processor.process(s);
-
-            // Debugging: Log processed HTML
-//            System.out.println("Processed HTML (before character adjustment): " + textHtml);
-
-            // Adjust characters in the SVG
             String adjustedHtml = adjustCharactersInSVG(textHtml);
 
-            // Debugging: Log adjusted HTML
-//            System.out.println("Adjusted HTML: " + adjustedHtml);
+            // Combine all components into the final HTML
+            String html = String.format(doc, css, adjustedHtml, scrollScript);
 
-            // Create final HTML
-            String html = String.format(doc, css, adjustedHtml);
-
-            messageBox.getEngine().loadContent( html, "text/html");
+            // Load the HTML content into the WebView
+            messageBox.getEngine().loadContent(html, "text/html");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
