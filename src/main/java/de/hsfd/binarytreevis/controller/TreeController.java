@@ -17,21 +17,28 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
+import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 @Author(name = "Agha Muhammad Aslam", date = "12 Dec 2023")
 public abstract class TreeController extends Application {
+    private final Logger log = Logger.getLogger(this.getClass().getName());
     enum StatusType {
         WARNING,
         ERROR,
@@ -104,9 +111,11 @@ public abstract class TreeController extends Application {
 
             messageBox.getStyleClass().add("browser");
 
+            Button downloadButton = (Button) mainScreen.lookup("#downloadButton");
+
             addFunctionalities(status,textField, insert, delete, nextButton,
                                prevButton, history, tree, view, treePanes, index,
-                               mainCanvas);
+                               mainCanvas, downloadButton);
             addHistoryFunctionalities(status, nextButton, prevButton,
                                       index, treePanes, tree);
 
@@ -327,8 +336,8 @@ public abstract class TreeController extends Application {
             Text statusPage, TextField textField,
             Button insert, Button delete, Button next, Button prev,
             ToggleButton history, TreeService<Integer> tree, TreePane view,
-            ArrayList<TreePane> treePanes, AtomicInteger index, Pane pane
-    ){
+            ArrayList<TreePane> treePanes, AtomicInteger index, Pane pane,
+            Button downloadButton){
 
         history.setOnAction(_ -> {
             this.isHistorySelected.set(history.isSelected());
@@ -403,6 +412,38 @@ public abstract class TreeController extends Application {
         textField.setOnKeyPressed(keyEvent -> {
             if(keyEvent.getCode() == KeyCode.ENTER) insertNewNode(statusPage,textField, tree, view, treePanes, index);
         });
+
+        downloadButton.setOnAction(_ -> downloadWebView(downloadButton));
+    }
+
+    private void downloadWebView(Button downloadButton) {
+        WebEngine webEngine = messageBox.getEngine();
+
+        // Get the HTML content of the page
+        String htmlContent = (String) webEngine.executeScript("document.documentElement.outerHTML");
+
+        // Open a FileChooser dialog for the user to specify where to save the file
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save HTML File");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("HTML Files", "*.html")
+        );
+
+        // Show the save dialog
+        Stage stage = (Stage) downloadButton.getScene().getWindow(); // Get the current window
+        File selectedFile = fileChooser.showSaveDialog(stage);
+
+        if (selectedFile != null) {
+            try (FileWriter fileWriter = new FileWriter(selectedFile)) {
+                fileWriter.write(htmlContent);
+                System.out.println("HTML file saved as " + selectedFile.getAbsolutePath());
+            } catch (IOException e) {
+                log.log(Level.SEVERE, "Error saving HTML file", e);
+            }
+        } else {
+            System.out.println("Save operation cancelled by the user.");
+        }
+
     }
 
     private void setHistoryDefaultConfiguration( Text status, String str,

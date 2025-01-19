@@ -50,6 +50,7 @@
                     <Button fx:id="insertButton" text="Insert" />
                     <Button fx:id="deleteButton" text="Delete" />
                     <ToggleButton fx:id="historyButton" text="History" />
+                    <Button fx:id="downloadButton" text="Download" />
                 </HBox>
                 <opaqueInsets>
                     <Insets />

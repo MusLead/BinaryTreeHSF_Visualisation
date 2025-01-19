@@ -80,6 +80,7 @@ public class RBTree<E extends Comparable<E>> extends TreeService<E> {
      */
     private void RBInsertFixup(TreeNode<E> z) {
         StringBuilder record = new StringBuilder();
+        recordTreeAsImage(z,record);
         while (z.getParent() != null &&
                 z.getParent().getParent() != null &&
                 z.getParent().getColor() == RED) {
@@ -139,8 +140,11 @@ public class RBTree<E extends Comparable<E>> extends TreeService<E> {
                 recordTreeAsImage(z.getParent(),record);
             }
         }
-        record.append("> Loop is finished, set the root (").append(this.getRoot().getData()).append(") into black\n");
+
         this.getRoot().setColor(BLACK);
+
+        record.append("> Loop is finished, set the root (").append(this.getRoot().getData()).append(") into black\n");
+        recordTreeAsImage(z,record);
         addRecord(record.toString());
     }
 
@@ -155,6 +159,7 @@ public class RBTree<E extends Comparable<E>> extends TreeService<E> {
      */
     private void newRBDeleteFixup(TreeNode<E> x) {
         StringBuilder record = new StringBuilder("> start delete fixup from "+x.getData()+"\n");
+        recordTreeAsImage(x,record);
         while (x != this.getRoot() && x.getColor() == BLACK ) {
             
             boolean isLeftChildrenOfParent = x == x.getParent().getLeft();
@@ -276,6 +281,7 @@ public class RBTree<E extends Comparable<E>> extends TreeService<E> {
         }
         x.setColor(BLACK);
         record.append("> Finish delete fixup. Change x (").append(x.getData()).append(") color to BLACK.\n");
+        recordTreeAsImage(x,record);
         addRecord(record.toString());
     }
 
