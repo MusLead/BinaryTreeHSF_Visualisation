@@ -103,10 +103,11 @@ public class RBTree<E extends Comparable<E>> extends TreeService<E> {
                 if (z == case2) {
                     record.append("> Case 2: Set z (").append(z.getData())
                             .append(") to parent (").append(parent.getData())
-                            .append(") and then rotate z (").append(z.getData()).append(")\n");
+                            .append(") and then rotate z (").append(parent.getData()).append(")\n");
                     z = parent;
                     if (isGrandparentLeftChild) leftRotate(z);
                     else rightRotate(z);
+                    parent = parent.getParent();
                 }
                 record.append("> Case 3: rotate grandParent (").append(grandParent.getData()).append("). ")
                         .append("Change color grandParent (").append(grandParent.getData())

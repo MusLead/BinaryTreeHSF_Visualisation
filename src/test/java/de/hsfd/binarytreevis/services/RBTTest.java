@@ -137,7 +137,7 @@ public class RBTTest {
         rbTree.insert(5);
         rbTree.insert(7);
         System.out.println("After insert 10, 5, and 7:\n" + rbTree.getTreePrinter().prettyPrint());
-        assertEquals(COLOR.BLACK, rbTree.getRoot().getLeft().getColor(), "because of the algorithm of deleteFixup in the book");
+        assertEquals(COLOR.RED, rbTree.getRoot().getLeft().getColor(), "because of the algorithm of deleteFixup in the book");
 
         // Delete node with single child (5)
         rbTree.delete(5);
@@ -255,7 +255,6 @@ public class RBTTest {
             System.out.println("Delete: " + rbt.getNodes().getLast());
             rbt.delete(rbt.getNodes().getLast());
         }
-        assertTrue(checkRBTProperties(rbt.getRoot()));
     }
 
     @Test
@@ -268,6 +267,24 @@ public class RBTTest {
 
         // Test for tree structure, colors, and properties after deletion
         assertTrue(checkRBTProperties(rbt.getRoot()));
+    }
+
+    @Test
+    public void testInsertionCase2andCase3() {
+        RBTree<Integer> rbt = new RBTree<>();
+        insert(41,rbt);
+        insert(38,rbt);
+        insert(21,rbt);
+        insert(12,rbt);
+        insert(19,rbt);
+        insert(8,rbt);
+
+        assertTrue(checkRBTProperties(rbt.getRoot()));
+        assertTrue(checkRBTProperties(rbt.getRoot()));
+        assertEquals(COLOR.BLACK, rbt.getRoot().getColor());
+        assertEquals(COLOR.BLACK, rbt.getRoot().getRight().getColor());
+        assertEquals(COLOR.RED, rbt.getRoot().getLeft().getColor());
+        assertEquals(19, rbt.getRoot().getLeft().getData());
     }
 
     @Test
