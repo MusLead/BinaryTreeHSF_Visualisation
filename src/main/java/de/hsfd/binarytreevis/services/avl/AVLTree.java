@@ -76,32 +76,43 @@ public class AVLTree<E extends Comparable<E>> extends TreeService<E> {
             if(balance > 1 || balance < -1) {
                 if (balance > 0) {
                     record.append("> Left heavy from the parent ").append(parent.getData()).append(", before rotation:\n");
-                    record.append(getTreePrinter().prettyPrint());
+                    recordTreeAsImage(parent, record);
+
                     if(getBalanceFactor(parent.getLeft()) < 0 ){
-                        record.append("-> Left Rotation, after rotation:\n");
                         leftRotate(parent.getLeft());// Left Right Case
-                        record.append(getTreePrinter().prettyPrint());
+
+                        record.append("-> Left Rotation, after rotation:\n");
+                        recordTreeAsImage(parent, record);
                     }
-                    record.append("-> Right Rotation, after rotation:\n");
+
                     rightRotate(parent);
-                    record.append(getTreePrinter().prettyPrint());
+
+                    record.append("-> Right Rotation, after rotation:\n");
+                    recordTreeAsImage(parent, record);
                 } else { // (balance < 0) right heavy from the parent
                     record.append("> Right heavy from the parent ").append(parent.getData()).append(", before rotation:\n");
-                    record.append(getTreePrinter().prettyPrint());
+                    recordTreeAsImage(parent, record);
+
                     if ( getBalanceFactor(parent.getRight()) > 0 ){
-                        record.append("-> Right Rotation, after rotation:\n");
                         rightRotate(parent.getRight());// Right Left Case
-                        record.append(getTreePrinter().prettyPrint());
+
+                        record.append("-> Right Rotation, after rotation:\n");
+                        recordTreeAsImage(parent, record);
                     }
-                    record.append("-> Left Rotation, after rotation:\n");
+
                     leftRotate(parent);
-                    record.append(getTreePrinter().prettyPrint());
+
+                    record.append("-> Left Rotation, after rotation:\n");
+                    recordTreeAsImage(parent, record);
                 }
+
                 if(parent.getParent() == null) this.setRoot(parent);
-                if (!(getBalanceFactor(parent) <= 1 && getBalanceFactor(parent) >= -1)) // this node to the leaf should now be balanced
+                if (!(getBalanceFactor(parent) <= 1 && getBalanceFactor(parent) >= -1)) {
+                    // this node to the leaf should now be balanced, otherwise error!
+                    recordTreeAsImage(parent, record);
                     throw new TreeException("Violates the AVL tree rule\nNode: " +
-                            parent.getData() +"\nHeight: " + parent.getHeight() + "\nTree:\n"
-                            + this.getTreePrinter().prettyPrint());
+                            parent.getData() + "\nHeight: " + parent.getHeight());
+                }
             }
             parent = parent.getParent();
         }

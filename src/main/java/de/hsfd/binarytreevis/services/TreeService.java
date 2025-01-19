@@ -3,7 +3,6 @@ package de.hsfd.binarytreevis.services;
 import de.hsfd.binarytreevis.TreePrinter;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
@@ -17,7 +16,7 @@ import java.util.function.Consumer;
  */
 @Author(name = "Ankit Sharma", date = "12 Oct 2018")
 @Author(name = "Agha Muhammad Aslam", date = "12 Dec 2023")
-public abstract class TreeService<E extends Comparable<E>> implements Iterable<E> {
+public abstract class TreeService<E extends Comparable<E>> {
 
     public TreeService( ) {}
 
@@ -252,7 +251,7 @@ public abstract class TreeService<E extends Comparable<E>> implements Iterable<E
      * @param newNode will be added to the tree
      */
     protected void insertNode(TreeNode<E> newNode) throws TreeException {
-        addRecord("- Insert " + newNode.getData() + " to the tree\n");
+        addRecord("\n- Insert " + newNode.getData() + " to the tree\n");
         if(root == null)
             root = newNode;
         else {
@@ -436,7 +435,8 @@ public abstract class TreeService<E extends Comparable<E>> implements Iterable<E
         if (root == null) throw new NullPointerException("The tree is empty");
         ArrayList<TreeNode<E>> queueNodes = new ArrayList<>();
         ArrayList<TreePrinter> queueNode = new ArrayList<>();
-        TreePrinter treePrinterRoot = new TreePrinter(Integer.parseInt(root.getData().toString()), null, null);
+        String color = root.getColor() == null ? "green" : root.getColor().toString();
+        TreePrinter treePrinterRoot = new TreePrinter(Integer.parseInt(root.getData().toString()), null, null, color);
         TreePrinter iterNode = treePrinterRoot;
 
         queueNodes.add(root);
@@ -444,13 +444,15 @@ public abstract class TreeService<E extends Comparable<E>> implements Iterable<E
             TreeNode<E> current = queueNodes.removeFirst();
             if (current.getLeft() != null && current.getLeft().getData() != null) {
                 int leftValue = Integer.parseInt(current.getLeft().getData().toString());
-                iterNode.setLeft(new TreePrinter(leftValue, null, null));
+                String colorLeft = current.getLeft().getColor() == null ? "green" : current.getLeft().getColor().toString();
+                iterNode.setLeft(new TreePrinter(leftValue, null, null, colorLeft));
                 queueNode.add(iterNode.getLeft());
                 queueNodes.add(current.getLeft());
             }
             if (current.getRight() != null && current.getRight().getData() != null) {
                 int rightValue = Integer.parseInt(current.getRight().getData().toString());
-                iterNode.setRight(new TreePrinter(rightValue, null, null));
+                String colorRight = current.getRight().getColor() == null ? "green" : current.getRight().getColor().toString();
+                iterNode.setRight(new TreePrinter(rightValue, null, null, colorRight));
                 queueNode.add(iterNode.getRight());
                 queueNodes.add(current.getRight());
             }
@@ -552,43 +554,25 @@ public abstract class TreeService<E extends Comparable<E>> implements Iterable<E
         }
     }
 
-    @Override
-    public Iterator<E> iterator() {
-        return new Iterator<>() {
-            private TreeNode<E> current = findMinimum(getRoot());
-
-            private TreeNode<E> findMinimum(TreeNode<E> node) {
-                while (node != null && node.getLeft() != null)
-                    node = node.getLeft();
-                return node;
-            }
-
-            private TreeNode<E> findSuccessor(TreeNode<E> node) {
-                if (node.getRight() != null) {
-                    return findMinimum(node.getRight());
-                }
-                TreeNode<E> parent = node.getParent();
-                while (parent != null && node == parent.getRight()) {
-                    node = parent;
-                    parent = parent.getParent();
-                }
-                return parent;
-            }
-
-            @Override
-            public boolean hasNext() {
-                return current != null;
-            }
-
-            @Override
-            public E next() {
-                if (current == null) throw new NoSuchElementException();
-                E data = current.getData();
-                current = findSuccessor(current);
-                return data;
-            }
-        };
+    /**
+     * Records the tree structure as an SVG image and appends it to the provided StringBuilder.
+     * The SVG content is wrapped in a <div> element. If the SVG content is successfully generated,
+     * a downloadable link for the SVG file is also appended to the StringBuilder.
+     * 
+     * @param <T> The type of the tree node data, which must be comparable.
+     * @param parent The root node of the tree to be recorded.
+     * @param record The StringBuilder to which the SVG content and download link will be appended.
+     */
+    protected <T extends Comparable<T>> void recordTreeAsImage(TreeNode<T> parent, StringBuilder record) {
+        String svgContent = this.getTreePrinter().getTreeAsImage();
+        record.append("<div>").append(svgContent).append("</div>\n");
+        if (svgContent != null) {
+            String downloadLink = TreePrinter.generateDownloadableSVGLink(svgContent, "tree_" +
+                    (parent != null ? parent.getData() : "null") + ".svg");
+            record.append(downloadLink).append("\n\n");
+        } else {
+            record.append("Failed to generate tree as SVG.\n\n");
+        }
     }
-
 
 }

@@ -1,5 +1,6 @@
 package de.hsfd.binarytreevis.controller;
 
+import com.github.rjeschke.txtmark.Processor;
 import de.hsfd.binarytreevis.services.Author;
 import de.hsfd.binarytreevis.services.TreeException;
 import de.hsfd.binarytreevis.services.TreeService;
@@ -16,19 +17,28 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @Author(name = "Agha Muhammad Aslam", date = "12 Dec 2023")
 public abstract class TreeController extends Application {
+    private final Logger log = Logger.getLogger(this.getClass().getName());
     enum StatusType {
         WARNING,
         ERROR,
@@ -63,7 +73,7 @@ public abstract class TreeController extends Application {
 
     private final Pane mainCanvas = (Pane) mainScreen.lookup("#canvas");
 
-    private final TextArea textAreaBox = (TextArea) mainScreen.lookup("#textAreaBox");
+    private final WebView messageBox = (WebView) mainScreen.lookup("#messageBox");
 
     public Pane getMainCanvas( ) {
         return mainCanvas;
@@ -99,19 +109,18 @@ public abstract class TreeController extends Application {
             Button prevButton = (Button) mainScreen.lookup("#prevButton");
             Text status = (Text) mainScreen.lookup("#pageView");
 
-            textAreaBox.setWrapText(true);
+            messageBox.getStyleClass().add("browser");
+
+            Button downloadButton = (Button) mainScreen.lookup("#downloadButton");
 
             addFunctionalities(status,textField, insert, delete, nextButton,
                                prevButton, history, tree, view, treePanes, index,
-                               mainCanvas);
+                               mainCanvas, downloadButton);
             addHistoryFunctionalities(status, nextButton, prevButton,
                                       index, treePanes, tree);
 
             tree.setStatus(nodesView::setText);
-            tree.setHistoryService(s -> {
-                textAreaBox.clear(); // every time the history accepts a record, clear all the log, and add a new one!
-                textAreaBox.appendText(s);
-            });
+            tree.setHistoryService(s -> reparse(s,messageBox));
 
         } catch (NullPointerException e){
             //noinspection CallToPrintStackTrace
@@ -119,6 +128,103 @@ public abstract class TreeController extends Application {
             updateStatus("Something went wrong!\n" + e.getMessage(), StatusType.ERROR);
         }
         return mainScreen;
+    }
+
+    private void reparse(String s, WebView messageBox) {
+        try {
+            // Define the HTML template
+            String doc = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\">"
+                    + "<link href=\"%s\" rel=\"stylesheet\"/></head><body>%s%s</body></html>";
+
+            // Define the CSS file link
+            String css = "https://raw.github.com/nicolashery/markdownpad-github/master/markdownpad-github.css";
+                        //"https://kevinburke.bitbucket.org/markdowncss/markdown.css";
+
+            // Define the JavaScript for auto-scrolling
+            String scrollScript = "<script>window.onload = function() { "
+                    + "window.scrollTo(0, document.body.scrollHeight); "
+                    + "}</script>";
+
+            // Process and adjust the input text
+            String textHtml = Processor.process(s);
+            String adjustedHtml = adjustCharactersInSVG(textHtml);
+
+            // Combine all components into the final HTML
+            String html = String.format(doc, css, adjustedHtml, scrollScript);
+
+            // Load the HTML content into the WebView
+            messageBox.getEngine().loadContent(html, "text/html");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Adjusts the characters within the <text> elements of an SVG block in the provided HTML string.
+     * This method processes the HTML to find <svg> tags and then adjusts the content of <text> elements
+     * within those <svg> tags to ensure correct rendering of characters.
+     *
+     * @param textHtml The HTML string containing SVG elements to be processed.
+     * @return A new HTML string with adjusted characters within the <text> elements of SVG blocks.
+     */
+    private String adjustCharactersInSVG(String textHtml) {
+        // Debugging step: Log processed HTML
+        // System.out.println("Processed HTML: " + textHtml);
+
+        // Match the <svg> tag and process its content
+        Pattern svgPattern = Pattern.compile("<svg[^>]*>.*?</svg>", Pattern.DOTALL);
+        Matcher svgMatcher = svgPattern.matcher(textHtml);
+        StringBuilder adjustedText = new StringBuilder();
+
+        while (svgMatcher.find()) {
+            String svgContent = svgMatcher.group(); // Extract the entire <svg> block
+
+            // Match and adjust the <text> content inside the <svg>
+            Pattern textPattern = Pattern.compile("(<text[^>]*>)(.*?)(</text>)", Pattern.DOTALL);
+            StringBuilder updatedSvgContent = getUpdatedSvgContent(textPattern, svgContent);
+
+            // Replace the original <svg> block with the updated one
+            svgMatcher.appendReplacement(adjustedText, updatedSvgContent.toString());
+        }
+        svgMatcher.appendTail(adjustedText);
+
+        return adjustedText.toString();
+    }
+
+    /**
+     * <p>
+     * Adjusts the characters within the <text> elements of an SVG block in the provided HTML string.
+     * This method processes the HTML to find <svg> tags and then adjusts the content of <text> elements
+     * within those <svg> tags to ensure correct rendering of characters. 
+     * </p>
+     * This method is used only by {@link #adjustCharactersInSVG(String)} to process the content of <text> elements.
+     *
+     * @param textPattern The pattern to match <text> elements within an SVG block.
+     * @param svgContent The SVG content to be processed.
+     * @return A new StringBuilder containing the SVG content with adjusted characters within the <text> elements.
+     */
+    private static StringBuilder getUpdatedSvgContent(Pattern textPattern, String svgContent) {
+        Matcher textMatcher = textPattern.matcher(svgContent);
+        StringBuilder updatedSvgContent = new StringBuilder();
+
+        while (textMatcher.find()) {
+            String textOpeningTag = textMatcher.group(1); // <text ...>
+            String textContent = textMatcher.group(2);    // Characters inside <text>...</text>
+            String textClosingTag = textMatcher.group(3); // </text>
+
+            StringBuilder incrementedContent = new StringBuilder();
+
+            // Increment each character in the text content
+            for (char c : textContent.toCharArray()) {
+                incrementedContent.append((char) (c + 1));
+            }
+
+            // Reassemble the <text> block with updated content
+            textMatcher.appendReplacement(updatedSvgContent,
+                    textOpeningTag + incrementedContent + textClosingTag);
+        }
+        textMatcher.appendTail(updatedSvgContent);
+        return updatedSvgContent;
     }
 
 
@@ -192,8 +298,8 @@ public abstract class TreeController extends Application {
             nextView.displayTree();
 
             if( !tree.getRecordList().isEmpty() ) {
-                textAreaBox.clear();
-                textAreaBox.appendText(tree.getRecordList().get(index.get()));
+                String s = tree.getRecordList().get(index.get());
+                reparse(s,messageBox);
             }
 
             status.setText((index.get() + 1) + "/" + treePanes.size());   // update the status
@@ -214,8 +320,8 @@ public abstract class TreeController extends Application {
             prevView.displayTree();
 
             if( !tree.getRecordList().isEmpty() ) {
-                textAreaBox.clear();
-                textAreaBox.appendText(tree.getRecordList().get(index.get()));
+                String s = tree.getRecordList().get(index.get());
+                reparse(s,messageBox);
             }
 
             status.setText((index.get() + 1) + "/" + treePanes.size());   // update the status
@@ -230,20 +336,20 @@ public abstract class TreeController extends Application {
             Text statusPage, TextField textField,
             Button insert, Button delete, Button next, Button prev,
             ToggleButton history, TreeService<Integer> tree, TreePane view,
-            ArrayList<TreePane> treePanes, AtomicInteger index, Pane pane
-    ){
+            ArrayList<TreePane> treePanes, AtomicInteger index, Pane pane,
+            Button downloadButton){
 
         history.setOnAction(_ -> {
             this.isHistorySelected.set(history.isSelected());
             if (history.isSelected()) {
                 setHistoryDefaultConfiguration(statusPage,"Action",isHistorySelected,textField, insert,
                                                delete, next, prev, history, tree, treePanes,
-                                               index, pane, textAreaBox, view);
+                                               index, pane, messageBox, view);
                 next.setDisable(index.get() == treePanes.size() - 1);
             } else {
                 setHistoryDefaultConfiguration(statusPage,"History",isHistorySelected,textField, insert,
                                                delete, next, prev, history, tree, treePanes,
-                                               index, pane, textAreaBox, view);
+                                               index, pane, messageBox, view);
             }
         });
 
@@ -287,7 +393,7 @@ public abstract class TreeController extends Application {
                     ex.printStackTrace();
                     String msg = tree.getRecordList().get(index.get())+ "----\n" + ex.getMessage();
                     tree.getRecordList().add(msg);
-                    textAreaBox.appendText(tree.getRecordList().get(index.incrementAndGet()));
+//                    messageBox.appendText(tree.getRecordList().get(index.incrementAndGet()));
                     updateStatus("Trying delete: " + key +"\nSomething went wrong,\nCheck the console!", StatusType.ERROR);
                 } catch (TreeException ex) {
                     throw new RuntimeException(ex);
@@ -306,6 +412,38 @@ public abstract class TreeController extends Application {
         textField.setOnKeyPressed(keyEvent -> {
             if(keyEvent.getCode() == KeyCode.ENTER) insertNewNode(statusPage,textField, tree, view, treePanes, index);
         });
+
+        downloadButton.setOnAction(_ -> downloadWebView(downloadButton));
+    }
+
+    private void downloadWebView(Button downloadButton) {
+        WebEngine webEngine = messageBox.getEngine();
+
+        // Get the HTML content of the page
+        String htmlContent = (String) webEngine.executeScript("document.documentElement.outerHTML");
+
+        // Open a FileChooser dialog for the user to specify where to save the file
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save HTML File");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("HTML Files", "*.html")
+        );
+
+        // Show the save dialog
+        Stage stage = (Stage) downloadButton.getScene().getWindow(); // Get the current window
+        File selectedFile = fileChooser.showSaveDialog(stage);
+
+        if (selectedFile != null) {
+            try (FileWriter fileWriter = new FileWriter(selectedFile)) {
+                fileWriter.write(htmlContent);
+                System.out.println("HTML file saved as " + selectedFile.getAbsolutePath());
+            } catch (IOException e) {
+                log.log(Level.SEVERE, "Error saving HTML file", e);
+            }
+        } else {
+            System.out.println("Save operation cancelled by the user.");
+        }
+
     }
 
     private void setHistoryDefaultConfiguration( Text status, String str,
@@ -314,7 +452,7 @@ public abstract class TreeController extends Application {
                                                  Button delete, Button next, Button prev,
                                                  ToggleButton history, TreeService<Integer> tree,
                                                  ArrayList<TreePane> treePanes, AtomicInteger index,
-                                                 Pane pane, TextArea textAreaBox, TreePane view
+                                                 Pane pane, WebView messageBox, TreePane view
     ) {
         history.setText(str);
         updateStatus((str.equals("History") ? "Action" : "History") +" mode", StatusType.NORMAL);
@@ -330,8 +468,8 @@ public abstract class TreeController extends Application {
         TreePane thisView = treePanes.get(index.get());
 
         if( !tree.getRecordList().isEmpty() ) {
-            textAreaBox.clear();
-            textAreaBox.appendText(tree.getRecordList().get(index.get()));
+            String s = tree.getRecordList().get(index.get());
+            reparse(s,messageBox);
         }
 
         if(!thisView.getTree().equals( view.getTree())) {
@@ -398,11 +536,6 @@ public abstract class TreeController extends Application {
                     -----
                     Delete and Insert will not working.
                     Please debug and restart the application!""";
-
-            ArrayList<String> recordList = tree.getRecordList();
-            String log = !recordList.isEmpty() ? recordList.get(index.get()) + message : message;
-            textAreaBox.appendText(log);
-
         }
 
         statusLabel.setText(statusType == StatusType.ERROR ? "ERROR" : message);
