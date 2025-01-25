@@ -84,7 +84,7 @@ public class RBTree<E extends Comparable<E>> extends TreeService<E> {
         while (z.getParent() != null &&
                 z.getParent().getParent() != null &&
                 z.getParent().getColor() == RED) {
-
+            record.append("> z is ").append(z.getData()).append(".\n");
             TreeNode<E> parent = z.getParent();
             TreeNode<E> grandParent = parent.getParent();
 
@@ -108,9 +108,9 @@ public class RBTree<E extends Comparable<E>> extends TreeService<E> {
 
                 record.append("after:\n");
                 recordTreeAsImage(z.getParent(),record);
-            } else {
-                if (z == case2) {
-                    record.append("> Case 2: Set z (").append(z.getData())
+            } else { // uncle is black
+                if (z == case2) { //
+                    record.append("> Case 2 uncle is black (triangle): Set z (").append(z.getData())
                             .append(") to parent (").append(parent.getData())
                             .append(") and then rotate z (").append(parent.getData()).append(").\n")
                             .append("Before:\n");
@@ -125,7 +125,7 @@ public class RBTree<E extends Comparable<E>> extends TreeService<E> {
                     recordTreeAsImage(z.getParent(),record);
 
                 }
-                record.append("> Case 3: rotate grandParent (").append(grandParent.getData()).append("). ")
+                record.append("> Case 3 uncle is black (line): rotate grandParent (").append(grandParent.getData()).append("). ")
                         .append("Change color grandParent (").append(grandParent.getData())
                         .append(") to red and parent (").append(parent.getData()).append(") to black.\n")
                         .append("Before:\n");
@@ -137,6 +137,7 @@ public class RBTree<E extends Comparable<E>> extends TreeService<E> {
                 else leftRotate(grandParent);
 
                 record.append("After:\n");
+                record.append("> z is now ").append(z.getData()).append(".\n");
                 recordTreeAsImage(z.getParent(),record);
             }
         }

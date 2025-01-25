@@ -32,8 +32,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 @Author(name = "Agha Muhammad Aslam", date = "12 Dec 2023")
@@ -147,10 +145,9 @@ public abstract class TreeController extends Application {
 
             // Process and adjust the input text
             String textHtml = Processor.process(s);
-            String adjustedHtml = adjustCharactersInSVG(textHtml);
 
             // Combine all components into the final HTML
-            String html = String.format(doc, css, adjustedHtml, scrollScript);
+            String html = String.format(doc, css, textHtml, scrollScript);
 
             // Load the HTML content into the WebView
             messageBox.getEngine().loadContent(html, "text/html");
@@ -158,75 +155,6 @@ public abstract class TreeController extends Application {
             throw new RuntimeException(e);
         }
     }
-
-    /**
-     * Adjusts the characters within the <text> elements of an SVG block in the provided HTML string.
-     * This method processes the HTML to find <svg> tags and then adjusts the content of <text> elements
-     * within those <svg> tags to ensure correct rendering of characters.
-     *
-     * @param textHtml The HTML string containing SVG elements to be processed.
-     * @return A new HTML string with adjusted characters within the <text> elements of SVG blocks.
-     */
-    private String adjustCharactersInSVG(String textHtml) {
-        // Debugging step: Log processed HTML
-        // System.out.println("Processed HTML: " + textHtml);
-
-        // Match the <svg> tag and process its content
-        Pattern svgPattern = Pattern.compile("<svg[^>]*>.*?</svg>", Pattern.DOTALL);
-        Matcher svgMatcher = svgPattern.matcher(textHtml);
-        StringBuilder adjustedText = new StringBuilder();
-
-        while (svgMatcher.find()) {
-            String svgContent = svgMatcher.group(); // Extract the entire <svg> block
-
-            // Match and adjust the <text> content inside the <svg>
-            Pattern textPattern = Pattern.compile("(<text[^>]*>)(.*?)(</text>)", Pattern.DOTALL);
-            StringBuilder updatedSvgContent = getUpdatedSvgContent(textPattern, svgContent);
-
-            // Replace the original <svg> block with the updated one
-            svgMatcher.appendReplacement(adjustedText, updatedSvgContent.toString());
-        }
-        svgMatcher.appendTail(adjustedText);
-
-        return adjustedText.toString();
-    }
-
-    /**
-     * <p>
-     * Adjusts the characters within the <text> elements of an SVG block in the provided HTML string.
-     * This method processes the HTML to find <svg> tags and then adjusts the content of <text> elements
-     * within those <svg> tags to ensure correct rendering of characters. 
-     * </p>
-     * This method is used only by {@link #adjustCharactersInSVG(String)} to process the content of <text> elements.
-     *
-     * @param textPattern The pattern to match <text> elements within an SVG block.
-     * @param svgContent The SVG content to be processed.
-     * @return A new StringBuilder containing the SVG content with adjusted characters within the <text> elements.
-     */
-    private static StringBuilder getUpdatedSvgContent(Pattern textPattern, String svgContent) {
-        Matcher textMatcher = textPattern.matcher(svgContent);
-        StringBuilder updatedSvgContent = new StringBuilder();
-
-        while (textMatcher.find()) {
-            String textOpeningTag = textMatcher.group(1); // <text ...>
-            String textContent = textMatcher.group(2);    // Characters inside <text>...</text>
-            String textClosingTag = textMatcher.group(3); // </text>
-
-            StringBuilder incrementedContent = new StringBuilder();
-
-            // Increment each character in the text content
-            for (char c : textContent.toCharArray()) {
-                incrementedContent.append((char) (c + 1));
-            }
-
-            // Reassemble the <text> block with updated content
-            textMatcher.appendReplacement(updatedSvgContent,
-                    textOpeningTag + incrementedContent + textClosingTag);
-        }
-        textMatcher.appendTail(updatedSvgContent);
-        return updatedSvgContent;
-    }
-
 
     /**
      * Sets the stage for the JavaFX application.
