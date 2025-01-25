@@ -32,8 +32,7 @@ public class AVLTree<E extends Comparable<E>> extends TreeService<E> {
                  possibleNullNode = deleteTargetWithOneChildOrNone(parentTarget, target, positionOfTarget);
             }
 
-            if(target.getParent() == null && target != getRoot()) target = parentTarget;
-            balanceTheTree(target);
+            balanceTheTree(parentTarget);
             return possibleNullNode;
         }
         return null;
@@ -160,10 +159,9 @@ public class AVLTree<E extends Comparable<E>> extends TreeService<E> {
                         leftRotate(parent.getLeft());
                     }
                     rightRotate(parent);
-                } else if (balance < 0) { // right heavy from the parent
+                } else if (balance < 0) { //right heavy from the parent
                     if (newNode.getData().compareTo(parent.getRight().getData()) < 0) {
                         rightRotate(parent.getRight());
-                        
                     }
                     leftRotate(parent);
                 }

@@ -414,7 +414,7 @@ public abstract class TreeService<E extends Comparable<E>> {
             // then take the right subtree of the result. if it does not exist then
             // the parent.left should be null
             parent.setLeft(result.getRight());
-            addRecord("> Case 2 two children: Replace the target " + target.getData() + "with the smallest value on " +
+            addRecord("> Case 2 two children: Replace the target " + target.getData() + " with the smallest value on " +
                     "the left of the right target's children "+ result.getData() +"\n");
         }
 
