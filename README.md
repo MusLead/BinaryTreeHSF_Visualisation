@@ -1,7 +1,9 @@
-# Binary Tree Visualisation
+# Binary Tree Visualisation 
 
 This Visualisation was developed by Ankit Sharma as
 LearnTrees. [See the repo](https://github.com/beingmartinbmc/LearnTrees.git)
+
+The Logic is being developed by Agha Muhammad Aslam and Team. It is being intended for the Portfolio project of Algorithm and Data Structure. 
 
 ## Overview:
 
@@ -39,6 +41,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Reference
 - [SLF4J](https://www.slf4j.org/codes.html#StaticLoggerBinder), [SLF4J-NOP MavenRep](https://mvnrepository.com/artifact/org.slf4j/slf4j-nop/2.1.0-alpha1) solving the Warning because using the WebView 
 - [Graphviz](https://github.com/nidi3/graphviz-java/blob/master/README.md) for showing the tree image in the WebView
-- [Markdown](https://central.sonatype.com/artifact/com.github.rjeschke/txtmark) based for java dependency. [txtmark github](https://github.com/rjeschke/txtmark)
+- [Markdown](https://central.sonatype.com/artifact/com.github.rjeschke/txtmark) based for java dependency. [txtmark GitHub](https://github.com/rjeschke/txtmark)
 - [Markdown-pd-fx](https://github.com/eugener/markdown-pad-fx/blob/master/markdown-pad-fx/src/main/java/org/oxbow/markdownfx/DocumentEditor.java) is an example how to implement the markdown dependency in the WebView.
 - [StackOverflow idea](https://stackoverflow.com/questions/17725377/add-hyperlink-inside-a-textarea-in-javafx), for showing image in the WebView rather than using the TextArea
+- [BinaryTreeHSF](https://github.com/MusLead/BinaryTreeHSF.git) the logic behind the Binary Tree Implementations such as RB-Tree, AVL-Tree, and Binary Search Tree
