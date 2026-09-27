@@ -34,6 +34,76 @@ This project introduces **real-time interaction with a history-tracking feature.
   experience for users.
 + Dynamic resizing of the pane and nodes to prevent overlaps and maintain a clear layout, regardless of tree size.
 
+## Requirements and running from Terminal
+
+- JDK 23 (not only a Java Runtime Environment). The Maven compiler configuration targets Java 23; Java 27 does not work with this project's JavaFX 23 WebView dependency.
+- Apache Maven.
+- Graphviz (`dot`) for tree-image rendering. On macOS, install it with `brew install graphviz` if rendering reports that no Graphviz engine could be initialized.
+
+On macOS, select JDK 23 in the Terminal session (if you installed a JDK archive manually, set `JAVA_HOME` to its `Contents/Home` directory instead):
+
+~~~bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 23)
+export PATH="$JAVA_HOME/bin:$PATH"
+java -version
+mvn -version
+~~~
+
+Clone and run the application:
+
+~~~bash
+git clone https://github.com/MusLead/BinaryTreeHSF_Visualisation.git
+cd BinaryTreeHSF_Visualisation
+mvn clean javafx:run
+~~~
+
+Run Maven from the directory containing `pom.xml`. Maven downloads the JavaFX dependencies on the first run.
+
+## Building a macOS app (Apple Silicon)
+
+These commands build an `.app` using JDK 23 and the Maven dependencies. Run them from a local project directory outside iCloud Drive: Finder metadata on an app generated inside iCloud Drive can make macOS code signing fail. Confirm `"$JAVA_HOME/bin/java" -version` reports 23 before building.
+
+~~~bash
+mvn clean package dependency:copy-dependencies \
+  -DincludeScope=runtime \
+  -DoutputDirectory=target/app-input
+
+mkdir -p target/app-mods
+cp target/BinaryTreeVis-1.0-SNAPSHOT.jar target/app-mods/
+find target/app-input -maxdepth 1 -type f -name '*.jar' \
+  ! -name 'javafx-*.jar' -exec cp {} target/app-mods/ \;
+cp target/app-input/javafx-*-mac-aarch64.jar target/app-mods/
+
+"$JAVA_HOME/bin/jpackage" \
+  --type app-image \
+  --name BinaryTreeVis \
+  --app-version 1.0.0 \
+  --module-path "$PWD/target/app-mods" \
+  --module de.hsfd.binarytreevis/de.hsfd.binarytreevis.Main \
+  --runtime-image "$JAVA_HOME" \
+  --dest target
+~~~
+
+The app will be at `target/BinaryTreeVis.app`. It includes a Java runtime, so users of the packaged app do not need to install a JDK. This build is for Apple Silicon Macs; build separately for other platforms. Test the launcher and tree rendering before sharing:
+
+~~~bash
+./target/BinaryTreeVis.app/Contents/MacOS/BinaryTreeVis
+~~~
+
+If Finder opens no window, this Terminal command displays the launch error. The app bundle has not yet been verified as a distributable release.
+
+## Sharing a compiled app
+
+After the app works, compress the entire `.app` bundle (it is a directory) into a ZIP file:
+
+~~~bash
+ditto -c -k --keepParent target/BinaryTreeVis.app BinaryTreeVis-macos-arm64-v1.0.0.zip
+~~~
+
+Create a GitHub **Release** for a version tag such as `v1.0.0` and attach the ZIP as a release asset. Share the release link; GitHub's automatically generated “Source code” ZIP contains the source, not the compiled app. Do not commit `target/` or the app bundle to the Git repository (`target/` is already ignored). Compressing the app reduces download size and keeps its bundle together, but you still need to compile once per version or whenever the code changes. Users can download the ZIP and run that built version without compiling it.
+
+An ad hoc signed app may be stopped by macOS Gatekeeper after download. For smooth public distribution, sign with an Apple Developer ID and notarize the app before publishing the ZIP.
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
