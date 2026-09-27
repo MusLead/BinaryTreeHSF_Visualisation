@@ -41,6 +41,7 @@
       </cursor>
    </Button>
 
-   <Label layoutX="140.0" layoutY="310.0" text="©️ 2018 Ankit Sharma"
-          style="-fx-font-size: 12px; -fx-text-fill: black;"/>
+   <Label layoutX="140.0" layoutY="295.0"
+       text="© 2018 Ankit Sharma&#10;© 2023 Agha M. Aslam"
+       style="-fx-font-size: 12px; -fx-text-fill: black;"/>
 </AnchorPane>
